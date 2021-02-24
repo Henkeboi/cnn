@@ -12,6 +12,23 @@ def main():
 
     data = np.random.rand(5, 5).flatten().reshape(1, 25)
     label = np.random.rand(1, 3)
+    #label = np.full((1, 3), 1.0)
+
+
+    kernel_n = 1
+    kernel_m = 2
+    channels = 1
+    h_stride = 1
+    v_stride = 1
+    padding = 0
+
+    input_layer = layers.InputLayer(25, 10)
+    conv_layer0 = layers.ConvolutionalLayer(kernel_n, kernel_m, channels, h_stride, v_stride, padding)
+    conv_layer1 = layers.ConvolutionalLayer(kernel_n, kernel_m, channels, h_stride, v_stride, padding)
+
+    conv_layer1.forward(conv_layer0.forward(input_layer.forward(data)), debug=True)
+
+    quit()
 
     input_layer = layers.InputLayer(25, 5)
     hidden_layer0 = layers.DenseLayer(5, 4, relu, relu_d)
