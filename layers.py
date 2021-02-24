@@ -10,7 +10,7 @@ class InputLayer:
         return data @ self._weights
         
 
-class HiddenLayer:
+class DenseLayer:
     def __init__(self, input_size, output_size, af, af_d):
         self._input_size = input_size
         self._output_size = output_size
