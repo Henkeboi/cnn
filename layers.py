@@ -20,16 +20,16 @@ class ConvolutionalLayer:
         self._padding = padding
 
     def convert_input_shape(self, data):
-        if data.ndim == 2:
-            print(data.shape)
+        if data[0].ndim == 1:
             data = data.reshape(self._channels, data.shape[0], data.shape[1])
+            return data
+        return data
 
     def forward(self, data, debug=False):
-        #data = self.convert_input_shape(data)
+        data = self.convert_input_shape(data)
 
         layer_output = []
         for channel in data:
-            channel = channel.reshape(1, 10)
             channel_x_len = channel.shape[1]
             channel_y_len = channel.shape[0]
             v = self._v_stride
@@ -54,7 +54,6 @@ class ConvolutionalLayer:
         if debug:
             print()
             print(layer_output)
-        print("A")
         return layer_output
 
 
