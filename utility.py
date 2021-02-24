@@ -8,15 +8,21 @@ class Sigmoid:
         return activation 
 
 class DerivativeSigmoid:
+    def sigmoid(self, activation):
+        size = activation.shape[0]
+        for i in range(size):
+            activation[i][0] = 1.0 / (1.0 + math.exp(-1.0 * activation[i][0]))
+        return activation
+ 
     def __call__(self, activation):
         size = activation.shape[0]
-        a_d = np.full((size, size), None)
-        for i in range(activation.shape[0]):
-            for j in range(activation.shape[0]):
-                a_d[i][j] = 1 * (activation.item(i, 0))
+        a_d = np.full((size, size), 0.0)
+
+        activation_col_d = self.sigmoid(activation)
+        for i in range(size):
+            for j in range(size):
+                a_d[i][j] = activation_col_d[i]
         return a_d
-
-
 
 class Relu:
     def __call__(self, activation):
