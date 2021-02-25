@@ -17,18 +17,32 @@ def main():
 
     kernel_n = 1
     kernel_m = 2
-    channels = 1
+    input_channel = 1
+    output_channel = 1
     h_stride = 1
     v_stride = 1
     padding = 0
 
     input_layer = layers.InputLayer(25, 10)
-    conv_layer0 = layers.ConvolutionalLayer(kernel_n, kernel_m, channels, h_stride, v_stride, padding)
-    conv_layer1 = layers.ConvolutionalLayer(kernel_n, kernel_m, channels, h_stride, v_stride, padding)
+    conv_layer0 = layers.ConvolutionalLayer(kernel_n, kernel_m, 1, 2, h_stride, v_stride, padding)
+    conv_layer1 = layers.ConvolutionalLayer(kernel_n, kernel_m, 2, 6, h_stride, v_stride, padding)
 
-    conv_layer1.forward(conv_layer0.forward(input_layer.forward(data)), debug=True)
+
+    data0 = input_layer.forward(data)
+    data1 = conv_layer0.forward(data0)
+    data2 = conv_layer1.forward(data1)
 
     quit()
+
+
+
+
+
+
+
+
+
+
 
     input_layer = layers.InputLayer(25, 5)
     hidden_layer0 = layers.DenseLayer(5, 4, relu, relu_d)

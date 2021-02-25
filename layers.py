@@ -10,18 +10,19 @@ class InputLayer:
         return data @ self._weights
         
 class ConvolutionalLayer:
-    def __init__(self, kernel_n, kernel_m, channels, h_stride, v_stride, padding):
+    def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
         self._kernels = []
-        for _ in range(channels):
+        for _ in range(output_channels):
             self._kernels.append(np.random.rand(kernel_n, kernel_m))
-        self._channels = channels
+        self._input_channels = input_channels
+        self._output_channels = output_channels
         self._h_stride = h_stride 
         self._v_stride = v_stride 
         self._padding = padding
 
     def convert_input_shape(self, data):
         if data[0].ndim == 1:
-            data = data.reshape(self._channels, data.shape[0], data.shape[1])
+            data = data.reshape(self._input_channels, data.shape[0], data.shape[1])
             return data
         return data
 
@@ -30,11 +31,15 @@ class ConvolutionalLayer:
 
         layer_output = []
         for channel in data:
+            if debug:
+                print("New channel")
             channel_x_len = channel.shape[1]
             channel_y_len = channel.shape[0]
             v = self._v_stride
             h = self._h_stride
             for i, kernel in enumerate(self._kernels):
+                if debug:
+                    print("New kernel")
                 n = kernel.shape[0]
                 m = kernel.shape[1]
                 if debug:
@@ -50,6 +55,7 @@ class ConvolutionalLayer:
                         kernel_output[y][x] = kernel.dot(channel[y : y + n, x : x + m].T)
                         if debug:
                             print()
+                print(kernel_output)
                 layer_output.append(kernel_output)
         if debug:
             print()
