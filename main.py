@@ -10,13 +10,13 @@ def main():
     sigmoid = utility.Sigmoid()
     sigmoid_d = utility.DerivativeSigmoid()
 
-    data = np.random.rand(5, 5).flatten().reshape(1, 25)
+    data = np.random.rand(5, 5)
     label = np.random.rand(1, 3)
     #label = np.full((1, 3), 1.0)
 
 
-    kernel_n = 1
-    kernel_m = 2
+    kernel_n = 3
+    kernel_m = 3
     input_channel = 1
     output_channel = 1
     h_stride = 1
@@ -25,11 +25,11 @@ def main():
 
     input_layer = layers.InputLayer(25, 10)
     conv_layer0 = layers.ConvolutionalLayer(kernel_n, kernel_m, 1, 2, h_stride, v_stride, padding)
-    conv_layer1 = layers.ConvolutionalLayer(kernel_n, kernel_m, 2, 6, h_stride, v_stride, padding)
+    conv_layer1 = layers.ConvolutionalLayer(kernel_n, kernel_m, 1, 1, h_stride, v_stride, padding)
 
 
-    data0 = input_layer.forward(data)
-    data1 = conv_layer0.forward(data0)
+    #data0 = input_layer.forward(data)
+    data1 = conv_layer0.forward(data)
     data2 = conv_layer1.forward(data1)
 
     quit()
