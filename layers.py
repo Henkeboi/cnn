@@ -53,7 +53,20 @@ class DenseLayer:
         self._af_d = af_d
         self._weights = np.random.rand(input_size, output_size) 
 
+    def convert_input_shape(self, data):
+        if type(data) is list:
+            data_converted = np.full((1, self._input_size), 0.0)
+            i = 0
+            for channel in data:
+                for element in channel.flatten():
+                    data_converted[0][i] = element
+                    i = i + 1
+            return data_converted
+        else:
+            return data
+
     def forward(self, data):
+        data = self.convert_input_shape(data)
         activation = data @ self._weights
         transfer = self._af(activation)
         return activation, transfer

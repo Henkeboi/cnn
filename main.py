@@ -15,8 +15,8 @@ def main():
     #label = np.full((1, 3), 1.0)
 
 
-    kernel_n = 3
-    kernel_m = 3
+    kernel_n = 2
+    kernel_m = 2
     input_channel = 1
     output_channel = 1
     h_stride = 1
@@ -25,35 +25,22 @@ def main():
 
     input_layer = layers.InputLayer(25, 10)
     conv_layer0 = layers.ConvolutionalLayer(kernel_n, kernel_m, 1, 2, h_stride, v_stride, padding)
-    conv_layer1 = layers.ConvolutionalLayer(kernel_n, kernel_m, 1, 1, h_stride, v_stride, padding)
+    conv_layer1 = layers.ConvolutionalLayer(kernel_n, kernel_m, 2, 2, h_stride, v_stride, padding)
+    dense_layer2 = layers.DenseLayer(3 * 3 * 4, 4, relu, relu_d)
+    dense_layer3 = layers.DenseLayer(4, 1, sigmoid, sigmoid_d)
 
 
     #data0 = input_layer.forward(data)
     data1 = conv_layer0.forward(data)
     data2 = conv_layer1.forward(data1)
+    data3 = dense_layer2.forward(data2) 
+    data4 = dense_layer3.forward(data3) 
+    print(data4)
+
+    #data3 = 
+    #print(data2.flatten())
 
     quit()
-
-
-
-
-
-
-
-
-
-
-
-    input_layer = layers.InputLayer(25, 5)
-    hidden_layer0 = layers.DenseLayer(5, 4, relu, relu_d)
-    hidden_layer1 = layers.DenseLayer(4, 3, relu, relu_d)
-    output_layer = layers.DenseLayer(3, 3, sigmoid, sigmoid_d)
-    hidden_layers = [hidden_layer0, hidden_layer1, output_layer]
-
-    nn = network.Network(input_layer, hidden_layers)
-    for i in range(10000):
-        print(nn.train(label, data).sum())
-        #nn.train(label, data).sum()
 
 
 
