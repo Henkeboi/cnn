@@ -5,9 +5,16 @@ class InputLayer:
         self._input_size = input_size
         self._output_size = output_size
         self._weights = np.random.rand(input_size, output_size) 
+    
+    def convert_input_shape(self, data):
+        if type(data) == np.ndarray:
+            if not data.ndim == 1:
+                data = data.flatten()
+        return data
 
     def forward(self, data): 
-        return data @ self._weights
+        data = self.convert_input_shape(data)
+        return (data @ self._weights).reshape(1, self._output_size)
         
 class ConvolutionalLayer:
     def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
