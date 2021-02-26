@@ -42,7 +42,7 @@ class Network:
 
 
     def train(self, label, data):
-        la = 0.0001
+        la = 0.01
         w_d, loss = self.backward_pass(label, data)
         for i, layer in enumerate(reversed(self._hidden_layers)):
             layer._weights = layer._weights + la * w_d[i]

@@ -4,14 +4,19 @@ import math
 class Sigmoid:
     def __call__(self, activation):
         for i in range(activation.shape[1]):
-            activation[0][i] = 1.0 / (1.0 + math.exp(-1.0 * activation[0][i]))
+            activation[0][i] = 1.0 / (1.0 + np.exp(-1.0 * activation[0][i]))
         return activation 
 
 class DerivativeSigmoid:
     def sigmoid(self, activation):
         size = activation.shape[0]
-        for i in range(size):
-            activation[i][0] = 1.0 / (1.0 + math.exp(-1.0 * activation[i][0]))
+        try:
+            for i in range(size):
+                activation[i][0] = 1.0 / (1.0 + math.exp(-1.0 * activation[i][0]))
+        except:
+            print(activation)
+            print()
+            quit()
         return activation
  
     def __call__(self, activation):
