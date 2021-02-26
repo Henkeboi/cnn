@@ -28,14 +28,15 @@ def main():
     dense_layer3 = layers.DenseLayer(4, 1, sigmoid, sigmoid_d)
     conv_layer4 = layers.ConvolutionalLayer(2, 1, 1, 2, h_stride, v_stride, padding)
 
+
+
+
+
     data1 = conv_layer0.forward(data)
     data2 = conv_layer1.forward(data1)
     data3 = dense_layer2.forward(data2) 
     data4 = dense_layer3.forward(data3) 
     data5 = conv_layer4.forward(data4)
-    print(data5)
-
-
 
     kernel_n = 1
     kernel_m = 2
@@ -58,12 +59,19 @@ def main():
     data3 = dense_layer2.forward(data2) 
     data4 = dense_layer3.forward(data3) 
     data5 = conv_layer4.forward(data4)
-    print(data5)
 
+    data = np.random.rand(5, 5).flatten().reshape(1, 25)
+    label = np.random.rand(1, 3)
 
-        
+    input_layer = layers.InputLayer(25, 5)
+    hidden_layer0 = layers.DenseLayer(5, 4, relu, relu_d)
+    hidden_layer1 = layers.DenseLayer(4, 3, relu, relu_d)
+    output_layer = layers.DenseLayer(3, 3, sigmoid, sigmoid_d)
+    hidden_layers = [hidden_layer0, hidden_layer1, output_layer]
 
-        
+    nn = network.Network(input_layer, hidden_layers)
+    for i in range(100):
+        print(nn.train(label, data).sum())
 
 if __name__ == "__main__":
     main()
