@@ -14,7 +14,8 @@ class InputLayer:
 
     def forward(self, data): 
         data = self.convert_input_shape(data)
-        return (data @ self._weights).reshape(1, self._output_size)
+        output = (data @ self._weights).reshape(1, self._output_size)
+        return output, []
         
 class ConvolutionalLayer:
     def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
@@ -36,7 +37,7 @@ class ConvolutionalLayer:
     def forward(self, data):
         data = self.convert_input_shape(data)
 
-        layer_output = []
+        layer_activations = []
         for channel in data:
             channel_x_len = channel.shape[1]
             channel_y_len = channel.shape[0]
@@ -45,12 +46,13 @@ class ConvolutionalLayer:
             for i, kernel in enumerate(self._kernels):
                 n = kernel.shape[0]
                 m = kernel.shape[1]
-                kernel_output = np.full((channel_y_len - n + 1, channel_x_len - m + 1), 0.0)
+                kernel_activation = np.full((channel_y_len - n + 1, channel_x_len - m + 1), 0.0)
+                kernel_transfer = np.full((channel_y_len - n + 1, channel_x_len - m + 1), 0.0)
                 for y in range(0, channel_y_len - n + 1, v):
                     for x in range(0, channel_x_len - m + 1, h):
-                        kernel_output[y][x] = np.multiply(kernel, channel[y : y + n, x : x + m]).sum()
-                layer_output.append(kernel_output)
-        return layer_output
+                        kernel_activation[y][x] = np.multiply(kernel, channel[y : y + n, x : x + m]).sum()
+                layer_activations.append(kernel_activation)
+        return layer_activations, []
 
 class DenseLayer:
     def __init__(self, input_size, output_size, af, af_d):
