@@ -29,15 +29,6 @@ class Network:
                     i = i + 1
         return activation_reshaped
 
-    def reshape_delta(self, delta, n, m):
-        delta_reshaped = np.full((n, m), 0.0)
-        i = 0
-        for y in range(n):
-            for x in range(m):
-                delta_reshaped[y][x] = delta[i]
-                i = i + 1
-        return delta.reshape(n, m)
-
     # todo: Support stride.
     def reverse_convolute(self, channel, delta): # The delta is related to a kernel deciding the strenght
         channel_x_len = channel.shape[1]
@@ -88,18 +79,18 @@ class Network:
 
                 # For hver kernel regn ut en delta tilhørende hver channel.
                 for delta_index, kernel in enumerate(layer.get_kernels()):
-                    #print("New kernel")
                     delta = deltas[-1][delta_index * delta_length : (delta_index + 1) * delta_length]
-                    kernel_n = output_activation[0].shape[0]
-                    kernel_m = output_activation[0].shape[1]
-                    kernel_delta = self.reshape_delta(delta, kernel_n, kernel_m)
+                    delta_n = output_activation[0].shape[0]
+                    delta_m = output_activation[0].shape[1]
+                    kernel_delta = delta.reshape(delta_n, delta_m)
+
+                    num_channels = len(input_activation)
+                    k_d = np.full((2, 2), 0.0)
                     for channel in input_activation:
-                        pass
-                        # print(self.reverse_convolute(channel, kernel_delta))
-                        # print(kernel.shape)
-                        # print(channel.shape)
-                        # print(kernel_delta.shape)
-                        # print()
+                        k_d = k_d + self.reverse_convolute(channel, kernel_delta)
+                    k_d = k_d / num_channels
+                    w_d.append(k_d)
+
 
         return w_d, loss
 
@@ -119,5 +110,7 @@ class Network:
             if type(layer) == layers.DenseLayer:
                 layer._weights = layer._weights + la * w_d[i]
             elif type(layer) == layers.ConvolutionalLayer:
-                pass
+                for k_index in range(len(layer.get_kernels())):
+                    layer._kernels[k_index] = layer._kernels[k_index] + 0.1 * la * w_d[i]
+                    i = i + 1
         return loss

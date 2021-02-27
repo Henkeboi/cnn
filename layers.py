@@ -21,7 +21,8 @@ class ConvolutionalLayer:
     def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
         self._kernels = []
         for _ in range(output_channels):
-            self._kernels.append(np.random.rand(kernel_n, kernel_m))
+            self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.5)
+
         self._input_channels = input_channels
         self._output_channels = output_channels
         self._h_stride = h_stride 
