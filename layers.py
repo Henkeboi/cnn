@@ -33,6 +33,9 @@ class ConvolutionalLayer:
             data = data.reshape(self._input_channels, data.shape[0], data.shape[1])
             return data
         return data
+    
+    def get_kernels(self):
+        return self._kernels
 
     def forward(self, data):
         data = self.convert_input_shape(data)
