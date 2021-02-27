@@ -29,6 +29,27 @@ class Network:
                     i = i + 1
         return activation_reshaped
 
+    def reshape_delta(self, delta, n, m):
+        delta_reshaped = np.full((n, m), 0.0)
+        i = 0
+        for y in range(n):
+            for x in range(m):
+                delta_reshaped[y][x] = delta[i]
+                i = i + 1
+        return delta.reshape(n, m)
+
+    # todo: Support stride.
+    def reverse_convolute(self, channel, delta): # The delta is related to a kernel deciding the strenght
+        channel_x_len = channel.shape[1]
+        channel_y_len = channel.shape[0]
+        n = delta.shape[0]
+        m = delta.shape[1]
+        k_d = np.full((1 + channel_y_len - n, 1 + channel_x_len - m), 0.0)
+        for x in range(0, 1 + channel_x_len - n):
+            for y in range(0, 1 + channel_y_len - m):
+                k_d[y][x] = np.multiply(delta, channel[y : y + n, x : x + m]).sum()
+        return k_d
+
     def backward_pass(self, label, data):
         activations, transfers = self.forward_pass(data)
         w_d = [] 
@@ -36,7 +57,7 @@ class Network:
 
         loss, loss_d = self.get_loss(label, activations[-1], transfers[-1])
         deltas.append(loss_d)
-        
+    
         for i, layer in enumerate(reversed(self._hidden_layers)):
             if type(layer) == layers.DenseLayer:
                 input_activation = activations[-2 - i]
@@ -45,10 +66,24 @@ class Network:
                 w_d.append(input_activation.T @ deltas[-1].T)
                 a_d = layer.derivative(input_activation.T)
                 w = layer._weights
-                delta = a_d.T @ layer._weights @ deltas[-1]
+                delta = a_d @ layer._weights @ deltas[-1]
                 deltas.append(delta)
             elif type(layer) == layers.ConvolutionalLayer:
-                pass
+                input_activation = activations[-2 - i]
+                output_activation = activations[-1 - i]
+                delta_length = output_activation[0].shape[0] * output_activation[0].shape[1]
+
+                # For hver kernel regn ut en delta tilhørende hver channel.
+                for delta_index, kernel in enumerate(layer.get_kernels()):
+                    print("New kernel")
+                    delta = deltas[-1][delta_index * delta_length : (delta_index + 1) * delta_length]
+                    kernel_delta = self.reshape_delta(delta, output_activation[0].shape[0], output_activation[0].shape[1])
+                    for channel in input_activation:
+                        print(self.reverse_convolute(channel, kernel_delta))
+                        print(kernel.shape)
+                        print(channel.shape)
+                        print(kernel_delta.shape)
+                        print()
 
         return w_d, loss
 
