@@ -50,6 +50,16 @@ class Network:
                 k_d[y][x] = np.multiply(delta, channel[y : y + n, x : x + m]).sum()
         return k_d
 
+    def vector_to_matrix(self, vector):
+        size = vector.shape[1]
+        matrix = np.full((size, size), 0.0)
+        i = 0
+        for y in range(size):
+            for x in range(size):
+                matrix[y][x] = vector[0][i % size]
+                i = i + 1
+        return matrix
+
     def backward_pass(self, label, data):
         activations, transfers = self.forward_pass(data)
         w_d = [] 
@@ -63,10 +73,13 @@ class Network:
                 input_activation = activations[-2 - i]
                 if type(input_activation) == list:
                     input_activation = self.vectorize_activation(input_activation).T
-                w_d.append(input_activation.T @ deltas[-1].T)
-                a_d = layer.derivative(input_activation.T)
+                    w_d.append(input_activation.T @ deltas[-1].T)
+                    a_d = self.vector_to_matrix(input_activation).T
+                else:
+                    w_d.append(input_activation.T @ deltas[-1].T)
+                    a_d = layer.derivative(input_activation.T)
                 w = layer._weights
-                delta = a_d @ layer._weights @ deltas[-1]
+                delta = a_d @ w @ deltas[-1]
                 deltas.append(delta)
             elif type(layer) == layers.ConvolutionalLayer:
                 input_activation = activations[-2 - i]
@@ -75,15 +88,18 @@ class Network:
 
                 # For hver kernel regn ut en delta tilhørende hver channel.
                 for delta_index, kernel in enumerate(layer.get_kernels()):
-                    print("New kernel")
+                    #print("New kernel")
                     delta = deltas[-1][delta_index * delta_length : (delta_index + 1) * delta_length]
-                    kernel_delta = self.reshape_delta(delta, output_activation[0].shape[0], output_activation[0].shape[1])
+                    kernel_n = output_activation[0].shape[0]
+                    kernel_m = output_activation[0].shape[1]
+                    kernel_delta = self.reshape_delta(delta, kernel_n, kernel_m)
                     for channel in input_activation:
-                        print(self.reverse_convolute(channel, kernel_delta))
-                        print(kernel.shape)
-                        print(channel.shape)
-                        print(kernel_delta.shape)
-                        print()
+                        pass
+                        # print(self.reverse_convolute(channel, kernel_delta))
+                        # print(kernel.shape)
+                        # print(channel.shape)
+                        # print(kernel_delta.shape)
+                        # print()
 
         return w_d, loss
 
