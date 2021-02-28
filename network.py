@@ -81,7 +81,6 @@ class Network:
                 kernel_deltas = []
                 for i in range(len(next_layer.get_kernels())):
                     kernel_deltas.insert(0, delta[-1 - i])
-                    #kernel_deltas.append(delta[-1 - i])
                 return kernel_deltas     
 
     def backward_pass(self, label, data):
@@ -119,52 +118,38 @@ class Network:
                     k_d = np.full((kernel.shape[0], kernel.shape[0]), 0.0)
                     for channel in input_activation:
                         self.reverse_convolute(kernel_delta, kernel)
-                        #delta = delta + channel @ self.reverse_convolute(kernel_delta, kernel)
-                        delta = delta + self.reverse_convolute(kernel_delta, kernel)
+                        delta = delta + channel @ self.reverse_convolute(kernel_delta, kernel)
                         k_d = k_d + self.convolute(channel, kernel_delta)
 
-                    num_channels = len(input_activation)
-                    num_channels = 1
-                    delta = np.true_divide(delta, num_channels)
-                    k_d = np.true_divide(k_d, num_channels)
                     deltas.append(delta)
                     w_d.append(k_d)
 
         return w_d, loss
 
     def get_loss(self, label, activation, transfer):
-        loss = (label - transfer)
         loss = np.full((label.shape[1], 1), 0.0)
         for i in range(loss.shape[0]):
             loss[i][0] = (label[0][i] - transfer[0][i])
-            #if label[0][i] < transfer[0][i]:
-            #    loss[i][0] = -loss[i][0]
-
 
         output_layer = self._hidden_layers[-1]
         f = output_layer.derivative(transfer.T)
         a = activation.T
-        #print(loss.shape)
-        #print(f.shape)
-        #print(a.shape)
-        
-        loss_d = f.T @ activation.T 
-        print(loss)
-        loss_d = np.multiply(loss, loss_d)
-
-        print()
+        loss_d = np.multiply(loss, f.T @ a)
 
         return loss, loss_d
 
 
     def train(self, label, data):
-        la = 0.1
         w_d, loss = self.backward_pass(label, data)
-        for i, layer in enumerate(reversed(self._hidden_layers)):
+        i = 0
+        for layer in reversed(self._hidden_layers):
             if type(layer) == layers.DenseLayer:
-                layer._weights = layer._weights + la * w_d[i]
+                pass
+                layer.update_weights(w_d[i])
+                i = i + 1
             elif type(layer) == layers.ConvolutionalLayer:
-                for k_index in range(len(layer.get_kernels())):
-                    layer._kernels[k_index] = layer._kernels[k_index] +  la * w_d[i]
-                    i = i + 1
+                num_kernels = len(layer.get_kernels())
+                layer.update_weights(w_d[i : i + num_kernels])
+                i = i + num_kernels
         return loss
+

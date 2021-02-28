@@ -18,10 +18,11 @@ class InputLayer:
         return output, []
         
 class ConvolutionalLayer:
-    def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
+    def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding, la):
         self._kernels = []
+        self._la = la
         for _ in range(output_channels):
-            self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.1)
+            self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.01)
 
         self._input_channels = input_channels
         self._output_channels = output_channels
@@ -34,6 +35,11 @@ class ConvolutionalLayer:
             data = data.reshape(self._input_channels, data.shape[0], data.shape[1])
             return data
         return data
+    
+    def update_weights(self, weights):
+        assert(len(weights) == len(self._kernels))
+        for i, d_w in enumerate(weights):
+            self._kernels[i] = self._kernels[i] + self._la * d_w
     
     def get_kernels(self):
         return self._kernels
@@ -58,22 +64,22 @@ class ConvolutionalLayer:
         return layer_activations, []
 
 class DenseLayer:
-    def __init__(self, input_size, output_size, af, af_d):
+    def __init__(self, input_size, output_size, af, af_d, la):
+        self._la = la
         self._input_size = input_size
         self._output_size = output_size
         self._af = af
         self._af_d = af_d
-        self._weights = np.random.rand(input_size, output_size) * 0.01
+        self._weights = np.random.rand(input_size, output_size) * 0.1
+    
+    def update_weights(self, d_w):
+        self._weights = self._weights + self._la * d_w
 
     def convert_input_shape(self, data):
         if type(data) is list:
-            data_converted = np.full((1, self._input_size), 0.0)
-            i = 0
-            for channel in data:
-                for element in channel.flatten():
-                    data_converted[0][i] = element
-                    i = i + 1
-            return data_converted
+            data = np.squeeze(data).flatten()
+            data = data.reshape(1, data.shape[0])
+            return data
         else:
             return data
 
