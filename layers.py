@@ -63,7 +63,7 @@ class DenseLayer:
         self._output_size = output_size
         self._af = af
         self._af_d = af_d
-        self._weights = np.random.rand(input_size, output_size) * 0.1
+        self._weights = np.random.rand(input_size, output_size) * 0.01
 
     def convert_input_shape(self, data):
         if type(data) is list:

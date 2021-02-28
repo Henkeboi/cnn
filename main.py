@@ -10,8 +10,8 @@ def main():
     sigmoid = utility.Sigmoid()
     sigmoid_d = utility.DerivativeSigmoid()
 
-    data = np.random.rand(10, 10)
-    label = np.random.rand(1, 5)
+    data = np.random.rand(8, 8)
+    label = np.random.rand(1, 2)
 
     kernel_n = 2
     kernel_m = 2
@@ -21,17 +21,17 @@ def main():
     v_stride = 1
     padding = 0
 
-    conv_layer0 = layers.ConvolutionalLayer(kernel_n, kernel_m, 1, 2, h_stride, v_stride, padding)
+    conv_layer0 = layers.ConvolutionalLayer(2, 2, 1, 2, h_stride, v_stride, padding)
     conv_layer1 = layers.ConvolutionalLayer(kernel_n, kernel_m, 2, 2, h_stride, v_stride, padding)
     conv_layer2 = layers.ConvolutionalLayer(kernel_n, kernel_m, 2, 2, h_stride, v_stride, padding)
-    dense_layer3 = layers.DenseLayer(8 * 7 * 7, 4, relu, relu_d)
-    dense_layer4 = layers.DenseLayer(4, 5, sigmoid, sigmoid_d)
+    dense_layer3 = layers.DenseLayer(8 * 5 * 5, 4, relu, relu_d)
+    dense_layer4 = layers.DenseLayer(4, 2, sigmoid, sigmoid_d)
 
     input_layer = conv_layer0
     hidden_layers = [conv_layer1, conv_layer2, dense_layer3, dense_layer4]
     nn = network.Network(input_layer, hidden_layers)
-    for i in range(100):
-        print(nn.train(label, data).sum())
+    for i in range(10000):
+        nn.train(label, data)
     quit()
 
 
