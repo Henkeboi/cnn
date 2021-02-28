@@ -21,7 +21,7 @@ class ConvolutionalLayer:
     def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
         self._kernels = []
         for _ in range(output_channels):
-            self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.5)
+            self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.1)
 
         self._input_channels = input_channels
         self._output_channels = output_channels
@@ -51,7 +51,6 @@ class ConvolutionalLayer:
                 n = kernel.shape[0]
                 m = kernel.shape[1]
                 kernel_activation = np.full((channel_y_len - n + 1, channel_x_len - m + 1), 0.0)
-                kernel_transfer = np.full((channel_y_len - n + 1, channel_x_len - m + 1), 0.0)
                 for y in range(0, channel_y_len - n + 1, v):
                     for x in range(0, channel_x_len - m + 1, h):
                         kernel_activation[y][x] = np.multiply(kernel, channel[y : y + n, x : x + m]).sum()

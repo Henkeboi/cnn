@@ -64,19 +64,25 @@ class Network:
                 i = i + 1
         return matrix
 
-    def format_delta(self, layer, output_sample, delta):
+    def format_delta(self, layer, next_layer, output_sample, delta):
         if type(delta == np.ndarray):
-            delta_length = output_sample.shape[0] * output_sample.shape[1]
-            delta_n = output_sample.shape[0]
-            delta_m = output_sample.shape[1]
-            kernel_deltas = []
-            for delta_index, kernel in enumerate(layer.get_kernels()):
-                kernel_delta = delta[delta_index * delta_length : (delta_index + 1) * delta_length]
-                kernel_delta = kernel_delta.reshape(delta_n, delta_m)
-                kernel_deltas.append(kernel_delta)
-            return kernel_deltas
-            
-
+            if type(next_layer) == layers.DenseLayer:
+                delta = delta[-1]
+                delta_length = output_sample.shape[0] * output_sample.shape[1]
+                delta_n = output_sample.shape[0]
+                delta_m = output_sample.shape[1]
+                kernel_deltas = []
+                for delta_index, kernel in enumerate(layer.get_kernels()):
+                    kernel_delta = delta[delta_index * delta_length : (delta_index + 1) * delta_length]
+                    kernel_delta = kernel_delta.reshape(delta_n, delta_m)
+                    kernel_deltas.append(kernel_delta)
+                return kernel_deltas
+            elif type(next_layer) == layers.ConvolutionalLayer:
+                kernel_deltas = []
+                for i in range(len(next_layer.get_kernels())):
+                    kernel_deltas.insert(0, delta[-1 - i])
+                    #kernel_deltas.append(delta[-1 - i])
+                return kernel_deltas     
 
     def backward_pass(self, label, data):
         activations, transfers = self.forward_pass(data)
@@ -102,20 +108,26 @@ class Network:
             elif type(layer) == layers.ConvolutionalLayer:
                 input_activation = activations[-2 - i]
                 output_sample = activations[-1 - i][0]
-                kernel_deltas = self.format_delta(layer, output_sample, delta)
+                assert(not i == 0)
+                next_layer = self._hidden_layers[-i] 
+                kernel_deltas = self.format_delta(layer, next_layer, output_sample, deltas)
 
                 for delta_index, kernel in enumerate(layer.get_kernels()):
                     kernel_delta = kernel_deltas[delta_index]
-                    k_d = np.full((2, 2), 0.0)
+
+                    delta = np.full((input_activation[0].shape[0], input_activation[0].shape[1]), 0.0)
+                    k_d = np.full((kernel.shape[0], kernel.shape[0]), 0.0)
                     for channel in input_activation:
-                        # self.reverse_convolute(kernel_delta, kernel)
-                        channel @ self.reverse_convolute(kernel_delta, kernel)
+                        self.reverse_convolute(kernel_delta, kernel)
+                        #delta = delta + channel @ self.reverse_convolute(kernel_delta, kernel)
+                        delta = delta + self.reverse_convolute(kernel_delta, kernel)
                         k_d = k_d + self.convolute(channel, kernel_delta)
 
                     num_channels = len(input_activation)
+                    delta = np.true_divide(delta, num_channels)
                     k_d = np.true_divide(k_d, num_channels)
+                    deltas.append(delta)
                     w_d.append(k_d)
-
 
         return w_d, loss
 
