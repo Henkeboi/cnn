@@ -95,7 +95,7 @@ class DenseLayer:
 
     def forward(self, data):
         data = self.convert_input_shape(data)
-        activation = data @ self._weights
+        activation = (data @ self._weights)
         transfer = self._af(activation)
         return activation, transfer
 

@@ -1,6 +1,7 @@
 import layers
 import utility
 import numpy as np
+import copy
 
 class Network:
     def __init__(self, input_layer, hidden_layers):
@@ -11,7 +12,6 @@ class Network:
         activations = []
         transfers = []
         activations.append(self._input_layer.forward(data)[0])
-
         for layer in self._hidden_layers:
             activation, transfer = layer.forward(activations[-1])
             activations.append(activation)
@@ -48,11 +48,11 @@ class Network:
         m = kernel.shape[1]
         channel_x_len = delta.shape[1] + kernel.shape[1] - 1
         channel_y_len = delta.shape[0] + kernel.shape[0] - 1
-        channel = np.full((channel_x_len, channel_y_len), 0.0)
+        channel = np.full((channel_y_len, channel_x_len), 0.0)
         for y in range(0, channel_y_len - n + 1):
             for x in range(0, channel_x_len - m + 1):
                 channel[y : y + n, x : x + m] = np.true_divide(delta[y][x], kernel)
-        return channel
+        return channel.T
 
     def vector_to_matrix(self, vector):
         size = vector.shape[1]
@@ -88,9 +88,9 @@ class Network:
         w_d = [] 
         deltas = []
 
-        loss, loss_d = self.get_loss(label, activations[-1], transfers[-1])
+        loss, loss_d = self.get_loss(label, copy.deepcopy(activations[-1]), transfers[-1])
         deltas.append(loss_d)
-    
+
         for i, layer in enumerate(reversed(self._hidden_layers)):
             if type(layer) == layers.DenseLayer:
                 input_activation = activations[-2 - i]
@@ -107,19 +107,23 @@ class Network:
             elif type(layer) == layers.ConvolutionLayer:
                 input_activation = activations[-2 - i]
                 output_sample = activations[-1 - i][0]
-                assert(not i == 0)
+                assert(not i == 0) # Convolution layer should not be output layer.
                 next_layer = self._hidden_layers[-i] 
                 kernel_deltas = self.format_delta(layer, next_layer, output_sample, deltas)
 
                 for delta_index, kernel in enumerate(layer.get_kernels()):
                     kernel_delta = kernel_deltas[delta_index]
-
-                    delta = np.full((input_activation[0].shape[0], input_activation[0].shape[1]), 0.0)
-                    k_d = np.full((kernel.shape[0], kernel.shape[0]), 0.0)
-                    for channel in input_activation:
-                        self.reverse_convolute(kernel_delta, kernel)
-                        delta = delta + channel @ self.reverse_convolute(kernel_delta, kernel)
-                        k_d = k_d + self.convolute(channel, kernel_delta)
+                    if type(input_activation) == list:
+                        delta = np.full((input_activation[0].shape[0], input_activation[0].shape[1]), 0.0)
+                        k_d = np.full((kernel.shape[0], kernel.shape[0]), 0.0)
+                        for channel in input_activation:
+                            delta = delta + channel @ self.reverse_convolute(kernel_delta, kernel)
+                            k_d = k_d + self.convolute(channel, kernel_delta)
+                    else:
+                        delta = np.full((input_activation.shape[0], input_activation.shape[1]), 0.0)
+                        k_d = np.full((kernel.shape[0], kernel.shape[0]), 0.0)
+                        delta = delta + input_activation @ self.reverse_convolute(kernel_delta, kernel)
+                        k_d = k_d + self.convolute(input_activation, kernel_delta)
 
                     deltas.append(delta)
                     w_d.append(k_d)
@@ -144,7 +148,6 @@ class Network:
         i = 0
         for layer in reversed(self._hidden_layers):
             if type(layer) == layers.DenseLayer:
-                pass
                 layer.update_weights(w_d[i])
                 i = i + 1
             elif type(layer) == layers.ConvolutionLayer:

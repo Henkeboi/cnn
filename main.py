@@ -11,22 +11,21 @@ def main():
     sigmoid = utility.Sigmoid()
     sigmoid_d = utility.DerivativeSigmoid()
 
+    data = np.random.rand(8, 8).flatten()
+    label = np.random.rand(1, 4)
 
-    #data = np.random.rand(8, 8).flatten()
-    #label = np.random.rand(1, 4)
+    input_layer = layers.InputLayer(64, 10)
 
-    #input_layer = layers.InputLayer(64, 10)
+    input_shape0 = (1, 10, 1)
+    output0 = (1, 2, 1)
+    c_layer0 = layers.ConvolutionLayer(input_shape0, output0, 1, 1, 0, 0.01)
 
-    #input_shape0 = (10, 0, 1)
-    #output0 = (2, 1, 1)
-    #c_layer0 = layers.ConvolutionLayer(input_shape0, output0, 1, 1, 0, 0.01)
+    dense_layer1 = layers.DenseLayer(c_layer0.get_output_shape(), 4, sigmoid, sigmoid_d, 0.01)
 
-    #dense_layer1 = layers.DenseLayer(c_layer0.get_output_shape(), 4, sigmoid, sigmoid_d, 0.01)
-
-    #hidden_layers = [c_layer0, dense_layer1]
-    #nn = network.Network(input_layer, hidden_layers)
-    #for i in range(1):
-    #    nn.train(label, data)
+    hidden_layers = [c_layer0, dense_layer1]
+    nn = network.Network(input_layer, hidden_layers)
+    for i in range(100):
+        nn.train(label, data)
 
 
 
