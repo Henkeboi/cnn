@@ -30,7 +30,7 @@ class Network:
         return activation_reshaped
 
     # todo: Support stride.
-    def reverse_convolute(self, channel, delta): # The delta is related to a kernel deciding the strenght
+    def convolute(self, channel, delta): # The delta is related to a kernel deciding the strenght
         channel_x_len = channel.shape[1]
         channel_y_len = channel.shape[0]
         n = delta.shape[0]
@@ -41,6 +41,19 @@ class Network:
                 k_d[y][x] = np.multiply(delta, channel[y : y + n, x : x + m]).sum()
         return k_d
 
+    # todo: Support stride
+    def reverse_convolute(self, delta, kernel):
+        stride = 1
+        n = kernel.shape[0]
+        m = kernel.shape[1]
+        channel_x_len = delta.shape[1] + kernel.shape[1] - 1
+        channel_y_len = delta.shape[0] + kernel.shape[0] - 1
+        channel = np.full((channel_x_len, channel_y_len), 0.0)
+        for y in range(0, channel_y_len - n + 1):
+            for x in range(0, channel_x_len - m + 1):
+                channel[y : y + n, x : x + m] = np.true_divide(delta[y][x], kernel)
+        return channel
+
     def vector_to_matrix(self, vector):
         size = vector.shape[1]
         matrix = np.full((size, size), 0.0)
@@ -50,6 +63,20 @@ class Network:
                 matrix[y][x] = vector[0][i % size]
                 i = i + 1
         return matrix
+
+    def format_delta(self, layer, output_sample, delta):
+        if type(delta == np.ndarray):
+            delta_length = output_sample.shape[0] * output_sample.shape[1]
+            delta_n = output_sample.shape[0]
+            delta_m = output_sample.shape[1]
+            kernel_deltas = []
+            for delta_index, kernel in enumerate(layer.get_kernels()):
+                kernel_delta = delta[delta_index * delta_length : (delta_index + 1) * delta_length]
+                kernel_delta = kernel_delta.reshape(delta_n, delta_m)
+                kernel_deltas.append(kernel_delta)
+            return kernel_deltas
+            
+
 
     def backward_pass(self, label, data):
         activations, transfers = self.forward_pass(data)
@@ -74,21 +101,19 @@ class Network:
                 deltas.append(delta)
             elif type(layer) == layers.ConvolutionalLayer:
                 input_activation = activations[-2 - i]
-                output_activation = activations[-1 - i]
-                delta_length = output_activation[0].shape[0] * output_activation[0].shape[1]
+                output_sample = activations[-1 - i][0]
+                kernel_deltas = self.format_delta(layer, output_sample, delta)
 
-                # For hver kernel regn ut en delta tilhørende hver channel.
                 for delta_index, kernel in enumerate(layer.get_kernels()):
-                    delta = deltas[-1][delta_index * delta_length : (delta_index + 1) * delta_length]
-                    delta_n = output_activation[0].shape[0]
-                    delta_m = output_activation[0].shape[1]
-                    kernel_delta = delta.reshape(delta_n, delta_m)
-
-                    num_channels = len(input_activation)
+                    kernel_delta = kernel_deltas[delta_index]
                     k_d = np.full((2, 2), 0.0)
                     for channel in input_activation:
-                        k_d = k_d + self.reverse_convolute(channel, kernel_delta)
-                    k_d = k_d / num_channels
+                        # self.reverse_convolute(kernel_delta, kernel)
+                        channel @ self.reverse_convolute(kernel_delta, kernel)
+                        k_d = k_d + self.convolute(channel, kernel_delta)
+
+                    num_channels = len(input_activation)
+                    k_d = np.true_divide(k_d, num_channels)
                     w_d.append(k_d)
 
 
