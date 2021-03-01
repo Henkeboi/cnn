@@ -65,23 +65,22 @@ class Network:
         return matrix
 
     def format_delta(self, layer, next_layer, output_sample, delta):
-        if type(delta == np.ndarray):
-            if type(next_layer) == layers.DenseLayer:
-                delta = delta[-1]
-                delta_length = output_sample.shape[0] * output_sample.shape[1]
-                delta_n = output_sample.shape[0]
-                delta_m = output_sample.shape[1]
-                kernel_deltas = []
-                for delta_index, kernel in enumerate(layer.get_kernels()):
-                    kernel_delta = delta[delta_index * delta_length : (delta_index + 1) * delta_length]
-                    kernel_delta = kernel_delta.reshape(delta_n, delta_m)
-                    kernel_deltas.append(kernel_delta)
-                return kernel_deltas
-            elif type(next_layer) == layers.ConvolutionLayer:
-                kernel_deltas = []
-                for i in range(len(next_layer.get_kernels())):
-                    kernel_deltas.insert(0, delta[-1 - i])
-                return kernel_deltas     
+        if type(next_layer) == layers.DenseLayer:
+            delta = delta[-1]
+            delta_length = output_sample.shape[0] * output_sample.shape[1]
+            delta_n = output_sample.shape[0]
+            delta_m = output_sample.shape[1]
+            kernel_deltas = []
+            for delta_index, kernel in enumerate(layer.get_kernels()):
+                kernel_delta = delta[delta_index * delta_length : (delta_index + 1) * delta_length]
+                kernel_delta = kernel_delta.reshape(delta_n, delta_m)
+                kernel_deltas.append(kernel_delta)
+            return kernel_deltas
+        elif type(next_layer) == layers.ConvolutionLayer:
+            kernel_deltas = []
+            for i in range(len(next_layer.get_kernels())):
+                kernel_deltas.insert(0, delta[-1 - i])
+            return kernel_deltas     
 
     def backward_pass(self, label, data):
         activations, transfers = self.forward_pass(data)
@@ -96,6 +95,8 @@ class Network:
                 input_activation = activations[-2 - i]
                 if type(input_activation) == list:
                     input_activation = self.vectorize_activation(input_activation).T
+                    if deltas[-1].shape[0] == 1: # Deltas from convolution layers need to be transposed
+                        deltas[-1] = deltas[-1].T
                     w_d.append(input_activation.T @ deltas[-1].T)
                     a_d = self.vector_to_matrix(input_activation).T
                 else:
@@ -141,7 +142,6 @@ class Network:
         loss_d = np.multiply(loss, f.T @ a)
 
         return loss, loss_d
-
 
     def train(self, label, data):
         w_d, loss = self.backward_pass(label, data)
