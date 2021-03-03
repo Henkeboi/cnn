@@ -84,6 +84,10 @@ class Network:
 
     def backward_pass(self, label, data):
         activations, transfers = self.forward_pass(data)
+        print(label)
+        print(activations[-1])
+        print(transfers[-1])
+        print()
         w_d = [] 
         deltas = []
 

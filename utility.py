@@ -1,6 +1,24 @@
 import numpy as np
 import math
 
+class Softmax:
+    def __call__(self, x):
+        e_x = np.exp(x - np.max(x))
+        return e_x / e_x.sum()
+
+class DerivativeSoftmax:
+    def __init__(self):
+        self.softmax = Softmax()
+
+    def __call__(self, activation):    
+        size = activation.shape[0]
+        a_d = np.full((size, size), 0.0)
+        for i in range(activation.shape[1]):
+            for j in range(activation.shape[0]):
+                a_d[i][j] = self.softmax(activation.item(i, 0)) * (1 - self.softmax(activation.item(i, 0)))
+        return a_d
+
+
 class Sigmoid:
     def __call__(self, activation):
         for i in range(activation.shape[1]):
