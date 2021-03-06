@@ -1,6 +1,8 @@
 import numpy as np
 import math
 import random
+import networkx as nx
+import matplotlib.pyplot as plt
 
 class Generator:
     def __init__(self, size, noise):
@@ -9,7 +11,28 @@ class Generator:
         self._data = None
         self._on = 1.0
         self._off = 0.0
-        self._noise = noise
+        self._noise = 0#noise
+        self._display_time = 5
+
+    def show(self, data):
+        node_counter = 0
+        pos = {}
+        edges = []
+        colors = []
+        for x in range(0, self._size):
+            for y in range(0, self._size):
+                pos[node_counter] = (x, y)
+                if data[y][x] == self._on:
+                    colors.append('blue')
+                elif data[y][x] == self._off:
+                    colors.append('red')
+                node_counter = node_counter + 1
+        G = nx.Graph()
+        G.add_nodes_from(pos.keys())
+        plt.clf()
+        nx.draw(G, pos, node_color=colors)
+        plt.show(block=False)
+        plt.pause(self._display_time)
 
     def generate(self, num):
         data = []
