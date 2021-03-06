@@ -44,6 +44,11 @@ class ConvolutionalLayer:
             return data
         return data
     
+    def update_weights(self, weights):
+        assert(len(weights) == len(self._kernels))
+        for i, d_w in enumerate(weights):
+            self._kernels[i] = self._kernels[i] + self._la * d_w
+
     def get_kernels(self):
         return self._kernels
 
@@ -89,6 +94,9 @@ class DenseLayer:
 
     def get_output_shape(self):
         return (1, self._output_size)
+
+    def update_weights(self, d_w):
+        self._weights = self._weights + self._la * d_w
 
     def forward(self, data):
         data = self.convert_input_shape(data)

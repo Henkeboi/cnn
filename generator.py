@@ -11,8 +11,12 @@ class Generator:
         self._data = None
         self._on = 1.0
         self._off = 0.0
-        self._noise = 0#noise
+        self._noise = noise
         self._display_time = 5
+        self._circle_label = np.full((1, 2), 0.0)
+        self._circle_label[0][0] = 1.0
+        self._cross_label = np.full((1, 2), 0.0)
+        self._cross_label[0][1] = 1.0
 
     def show(self, data):
         node_counter = 0
@@ -36,18 +40,13 @@ class Generator:
 
     def generate(self, num):
         data = []
-        circle_label = np.full((1, 2), 0.0)
-        circle_label[0][0] = 1.0
-        cross_label = np.full((1, 2), 0.0)
-        cross_label[0][1] = 1.0
-
         for i in range(num):
             circle = self.generate_circle()
             cross = self.generate_cross()
-            data.append((circle_label, circle))
-            data.append((cross_label, cross))
-
+            data.append((self._circle_label, circle))
+            data.append((self._cross_label, cross))
         return data
+
 
 
     def generate_circle(self):

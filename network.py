@@ -121,11 +121,6 @@ class Network:
                         #delta = delta + channel @ self.reverse_convolute(kernel_delta, kernel)
                         delta = delta + self.reverse_convolute(kernel_delta, kernel)
                         k_d = k_d + self.convolute(channel, kernel_delta)
-
-                    num_channels = len(input_activation)
-                    num_channels = 1
-                    delta = np.true_divide(delta, num_channels)
-                    k_d = np.true_divide(k_d, num_channels)
                     deltas.append(delta)
                     w_d.append(k_d)
 
@@ -140,9 +135,6 @@ class Network:
         output_layer = self._hidden_layers[-1]
         f = output_layer.derivative(transfer.T)
         a = activation.T
-        #print(loss.shape)
-        #print(f.shape)
-        #print(a.shape)
         
         loss_d = f.T @ activation.T 
         loss_d = np.multiply(loss, loss_d)
@@ -150,13 +142,15 @@ class Network:
 
     def train(self, label, data):
         la_dense = 0.01
-        la_convolution = 0.00001
         w_d, loss = self.backward_pass(label, data)
-        for i, layer in enumerate(reversed(self._hidden_layers)):
+        i = 0
+        for layer in reversed(self._hidden_layers):
             if type(layer) == layers.DenseLayer:
-                layer._weights = layer._weights + la_dense * w_d[i]
+                layer.update_weights(w_d[i])
+                i = i + 1
             elif type(layer) == layers.ConvolutionalLayer:
                 for k_index in range(len(layer.get_kernels())):
-                    layer._kernels[k_index] = layer._kernels[k_index] +  la_convolution * w_d[i]
+                    num_kernels = len(layer.get_kernels())
+                    layer.update_weights(w_d[i : i + num_kernels])
                     i = i + 1
         return loss
