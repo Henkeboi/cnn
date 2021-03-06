@@ -77,7 +77,7 @@ class Network:
                     kernel_delta = kernel_delta.reshape(delta_n, delta_m)
                     kernel_deltas.append(kernel_delta)
                 return kernel_deltas
-            elif type(next_layer) == layers.ConvolutionalLayer:
+            elif type(next_layer) == layers.ConvolutionLayer:
                 kernel_deltas = []
                 for i in range(len(next_layer.get_kernels())):
                     kernel_deltas.insert(0, delta[-1 - i])
@@ -104,7 +104,7 @@ class Network:
                 w = layer._weights
                 delta = a_d @ w @ deltas[-1]
                 deltas.append(delta)
-            elif type(layer) == layers.ConvolutionalLayer:
+            elif type(layer) == layers.ConvolutionLayer:
                 input_activation = activations[-2 - i]
                 output_sample = activations[-1 - i][0]
                 assert(not i == 0)
@@ -148,7 +148,7 @@ class Network:
             if type(layer) == layers.DenseLayer:
                 layer.update_weights(w_d[i])
                 i = i + 1
-            elif type(layer) == layers.ConvolutionalLayer:
+            elif type(layer) == layers.ConvolutionLayer:
                 for k_index in range(len(layer.get_kernels())):
                     num_kernels = len(layer.get_kernels())
                     layer.update_weights(w_d[i : i + num_kernels])

@@ -25,7 +25,7 @@ def main():
     kernel_m = 4
     channels_out = 1
     output_shape = (kernel_n, kernel_m, channels_out)
-    input_layer = layers.ConvolutionalLayer(input_shape, output_shape, 1, 1, 0, 0.01)
+    input_layer = layers.ConvolutionLayer(input_shape, output_shape, 1, 1, 0, 0.01)
     hidden_layer0 = layers.DenseLayer(input_layer.get_output_shape(), 5, relu, relu_d, 0.01)
     output_layer = layers.DenseLayer(hidden_layer0.get_output_shape(), len(shapes), sigmoid, sigmoid_d, 0.01)
     hidden_layers = [hidden_layer0, output_layer]

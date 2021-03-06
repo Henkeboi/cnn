@@ -18,7 +18,7 @@ class InputLayer:
         output = (data @ self._weights).reshape(1, self._output_size)
         return output, []
         
-class ConvolutionalLayer:
+class ConvolutionLayer:
     def __init__(self, input_shape, output_shape, h_stride, v_stride, padding, la):
         self._kernels = []
         self._kernel_n = output_shape[0]
