@@ -5,7 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 class Generator:
-    def __init__(self, size, noise):
+    def __init__(self, size, noise, shapes):
         self._size = size
         self._noise = noise
         self._data = None
@@ -13,10 +13,20 @@ class Generator:
         self._off = 0.0
         self._noise = noise
         self._display_time = 5
-        self._circle_label = np.full((1, 2), 0.0)
-        self._circle_label[0][0] = 1.0
-        self._cross_label = np.full((1, 2), 0.0)
-        self._cross_label[0][1] = 1.0
+        self._shapes = shapes
+
+        self._circle_label = np.full((1, len(shapes)), 0.0)
+        if len(shapes) > 0:
+            self._circle_label[0][0] = 1.0
+
+        self._cross_label = np.full((1, len(shapes)), 0.0)
+        if len(shapes) > 1:
+            self._cross_label[0][1] = 1.0
+
+        self._rectangle_label = np.full((1, len(shapes)), 0.0)
+        if len(shapes) > 2:
+            self._rectangle_label[0][2] = 1.0
+
 
     def show(self, data):
         node_counter = 0
@@ -41,10 +51,15 @@ class Generator:
     def generate(self, num):
         data = []
         for i in range(num):
-            circle = self.generate_circle()
-            cross = self.generate_cross()
-            data.append((self._circle_label, circle))
-            data.append((self._cross_label, cross))
+            if "circle" in self._shapes:
+                circle = self.generate_circle()
+                data.append((self._circle_label, circle))
+            if "cross" in self._shapes:
+                cross = self.generate_cross()
+                data.append((self._cross_label, cross))
+            if "rectangle" in self._shapes:
+                rectangle = self.generate_rectangle()
+                data.append((self._rectangle_label, rectangle))
         return data
 
 
@@ -71,7 +86,7 @@ class Generator:
         cross = self._add_noise(cross)
         return cross
 
-    def _generate_rectangle(self, num):
+    def generate_rectangle(self):
         rectangle = np.ones((self._size, self._size), dtype=float) * self._off 
         for x in range(0, self._size):
             for y in range(0, self._size):
