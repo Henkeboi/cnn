@@ -21,7 +21,7 @@ class ConvolutionalLayer:
     def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
         self._kernels = []
         for _ in range(output_channels):
-            self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.1)
+            self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.8)
 
         self._input_channels = input_channels
         self._output_channels = output_channels
@@ -63,7 +63,7 @@ class DenseLayer:
         self._output_size = output_size
         self._af = af
         self._af_d = af_d
-        self._weights = np.random.rand(input_size, output_size) * 0.01
+        self._weights = np.random.rand(input_size, output_size) * 0.1
 
     def convert_input_shape(self, data):
         if type(data) is list:
