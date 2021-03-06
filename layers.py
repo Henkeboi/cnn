@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class InputLayer:
     def __init__(self, input_size, output_size):
@@ -18,17 +19,6 @@ class InputLayer:
         return output, []
         
 class ConvolutionalLayer:
-    #def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
-    #    self._kernels = []
-    #    for _ in range(output_channels):
-    #        self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.8)
-
-    #    self._input_channels = input_channels
-    #    self._output_channels = output_channels
-    #    self._h_stride = h_stride 
-    #    self._v_stride = v_stride 
-    #    self._padding = padding
-
     def __init__(self, input_shape, output_shape, h_stride, v_stride, padding, la):
         self._kernels = []
         self._kernel_n = output_shape[0]
@@ -41,7 +31,6 @@ class ConvolutionalLayer:
         self._h_stride = h_stride 
         self._v_stride = v_stride 
         self._padding = padding
-
 
     def get_output_shape(self):
         shape_n = self._input_shape[0] - self._kernel_n + 1
@@ -78,12 +67,13 @@ class ConvolutionalLayer:
         return layer_activations, []
 
 class DenseLayer:
-    def __init__(self, input_size, output_size, af, af_d):
-        self._input_size = input_size
+    def __init__(self, input_shape, output_size, af, af_d, la):
+        self._la = la
+        self._input_size = math.prod(input_shape)
         self._output_size = output_size
         self._af = af
         self._af_d = af_d
-        self._weights = np.random.rand(input_size, output_size) * 0.1
+        self._weights = np.random.rand(self._input_size, output_size) * 0.1
 
     def convert_input_shape(self, data):
         if type(data) is list:
@@ -96,6 +86,9 @@ class DenseLayer:
             return data_converted
         else:
             return data
+
+    def get_output_shape(self):
+        return (1, self._output_size)
 
     def forward(self, data):
         data = self.convert_input_shape(data)
