@@ -17,9 +17,11 @@ def main():
     size = 8
     noise = 0.0
     generator = Generator(size, noise)
-    data = generator.generate(1000)
-
-    input_layer = layers.ConvolutionalLayer(3, 3, 1, 1, 1, 1, 0)
+    data = generator.generate(500)
+    
+    input_shape = (size, size, 1)
+    output_shape = (3, 3, 1)
+    input_layer = layers.ConvolutionalLayer(input_shape, output_shape, 1, 1, 0, 0.0000001)
     hidden_layer0 = layers.DenseLayer(1 * 6 * 6, 5, relu, relu_d)
     output_layer = layers.DenseLayer(5, 2, sigmoid, sigmoid_d)
     hidden_layers = [hidden_layer0, output_layer]

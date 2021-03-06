@@ -18,20 +18,40 @@ class InputLayer:
         return output, []
         
 class ConvolutionalLayer:
-    def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
-        self._kernels = []
-        for _ in range(output_channels):
-            self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.8)
+    #def __init__(self, kernel_n, kernel_m, input_channels, output_channels, h_stride, v_stride, padding):
+    #    self._kernels = []
+    #    for _ in range(output_channels):
+    #        self._kernels.append(np.random.rand(kernel_n, kernel_m) * 0.8)
 
-        self._input_channels = input_channels
-        self._output_channels = output_channels
+    #    self._input_channels = input_channels
+    #    self._output_channels = output_channels
+    #    self._h_stride = h_stride 
+    #    self._v_stride = v_stride 
+    #    self._padding = padding
+
+    def __init__(self, input_shape, output_shape, h_stride, v_stride, padding, la):
+        self._kernels = []
+        self._kernel_n = output_shape[0]
+        self._kernel_m = output_shape[1] 
+        self._la = la
+        self._input_shape = input_shape
+        for _ in range(output_shape[2]):
+            self._kernels.append(np.random.rand(output_shape[0], output_shape[1]) * 0.8)
+
         self._h_stride = h_stride 
         self._v_stride = v_stride 
         self._padding = padding
 
+
+    def get_output_shape(self):
+        shape_n = self._input_shape[0] - self._kernel_n + 1
+        shape_m = self._input_shape[1] - self._kernel_m + 1
+        shape_k = self._input_shape[2] * len(self._kernels)
+        return (shape_n, shape_m, shape_k)
+
     def convert_input_shape(self, data):
         if data[0].ndim == 1:
-            data = data.reshape(self._input_channels, data.shape[0], data.shape[1])
+            data = data.reshape(self._input_shape[2], data.shape[0], data.shape[1])
             return data
         return data
     
