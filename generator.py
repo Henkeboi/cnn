@@ -12,12 +12,22 @@ class Generator:
         self._noise = noise
 
     def generate(self, num):
-        circle = self._generate_circle(num).flatten()
-        cross = self._generate_cross(num).flatten()
-        rectangle = self._generate_rectangle(num).flatten()
-        return circle, cross, rectangle
+        data = []
+        circle_label = np.full((1, 2), 0.0)
+        circle_label[0][0] = 1.0
+        cross_label = np.full((1, 2), 0.0)
+        cross_label[0][1] = 1.0
 
-    def _generate_circle(self, num):
+        for i in range(num):
+            circle = self.generate_circle()
+            cross = self.generate_cross()
+            data.append((circle_label, circle))
+            data.append((cross_label, cross))
+
+        return data
+
+
+    def generate_circle(self):
         circle = np.ones((self._size, self._size), dtype=float) * self._off
         radius = self._size / 3
 
@@ -30,7 +40,7 @@ class Generator:
         circle = self._add_noise(circle)
         return circle 
 
-    def _generate_cross(self, num):
+    def generate_cross(self):
         cross = np.ones((self._size, self._size), dtype=float) * self._off
         for x in range(0, self._size):
             for y in range(0, self._size):
