@@ -12,8 +12,9 @@ class InputLayer:
             if not data.ndim == 1:
                 data = data.flatten()
         return data
+
     def get_output_shape(self):
-        return (1, self._output_size)
+        return (1, self._output_size, 1)
 
     def forward(self, data): 
         data = self.convert_input_shape(data)
@@ -93,7 +94,7 @@ class DenseLayer:
             return data
 
     def get_output_shape(self):
-        return (1, self._output_size)
+        return (1, self._output_size, 1)
 
     def update_weights(self, d_w):
         self._weights = self._weights + self._la * d_w
