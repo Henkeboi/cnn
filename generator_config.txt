@@ -1,0 +1,5 @@
+size: 15
+noise: 0.05
+training_set_size: 5000
+validation_set_size: 1000
+shapes: [circle, cross, rectangle, triangle]

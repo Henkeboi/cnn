@@ -8,6 +8,12 @@ class Network:
         self._input_layer = input_layer
         self._hidden_layers = hidden_layers
 
+    def get_layers(self):
+        layers = [self._input_layer]
+        for layer in self._hidden_layers:
+            layers.append(layer)
+        return layers
+
     def forward_pass(self, data):
         activations = []
         transfers = []

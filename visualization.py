@@ -2,7 +2,8 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def show_figure(figure, display_time):
+def show_figure(figure):
+    plt.figure()
     node_counter = 0
     pos = {}
     edges = []
@@ -17,19 +18,17 @@ def show_figure(figure, display_time):
             node_counter = node_counter + 1
     G = nx.Graph()
     G.add_nodes_from(pos.keys())
-    plt.clf()
     nx.draw(G, pos, node_color=colors)
     plt.show(block=False)
-    plt.pause(display_time)
 
-def show_loss(loss, display_time, title):
+def show_loss(loss, title):
+    plt.figure()
     plt.plot(loss)
     plt.title(title)
     plt.show(block=False)
-    plt.pause(display_time)
-    plt.clf()
 
-def hinton(matrix, max_weight=None, ax=None):
+def show_hinton(matrix, max_weight=None, ax=None):
+    plt.figure()
     ax = ax if ax is not None else plt.gca()
     if not max_weight:
         max_weight = 2 ** np.ceil(np.log(np.abs(matrix).max()) / np.log(2))
@@ -48,5 +47,4 @@ def hinton(matrix, max_weight=None, ax=None):
     ax.autoscale_view()
     ax.invert_yaxis()
     plt.show(block=False)
-    plt.pause(display_time)
 

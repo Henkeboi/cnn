@@ -52,7 +52,7 @@ class Relu:
     def __call__(self, activation):
         return activation * (activation > 0)
 
-class MatrixDerivativeRelu:
+class DerivativeRelu:
     def __call__(self, activation):
         size = activation.shape[0]
         a_d = np.full((size, size), None)
@@ -60,11 +60,6 @@ class MatrixDerivativeRelu:
             for j in range(activation.shape[0]):
                 a_d[i][j] = 1.0 * (activation.item(i, 0) >= 0)
         return a_d
-
-class VectorDerivativeRelu:
-    def __call__(self, activation):
-        return 1.0 * (activation >= 0)
-
 
 class MSE:
     def __call__(self, label, prediction):
