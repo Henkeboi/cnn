@@ -1,7 +1,6 @@
 import numpy as np
 import math
 import random
-import networkx as nx
 import matplotlib.pyplot as plt
 
 class Generator:
@@ -36,26 +35,6 @@ class Generator:
             self._triangle_label[0][label_counter] = 1.0
             label_counter = label_counter + 1
 
-    def show(self, data):
-        node_counter = 0
-        pos = {}
-        edges = []
-        colors = []
-        for x in range(0, self._size):
-            for y in range(0, self._size):
-                pos[node_counter] = (x, y)
-                if data[y][x] == self._on:
-                    colors.append('blue')
-                elif data[y][x] == self._off:
-                    colors.append('red')
-                node_counter = node_counter + 1
-        G = nx.Graph()
-        G.add_nodes_from(pos.keys())
-        plt.clf()
-        nx.draw(G, pos, node_color=colors)
-        plt.show(block=False)
-        plt.pause(self._display_time)
-
     def generate(self, num):
         data = []
         for i in range(num):
@@ -72,8 +51,6 @@ class Generator:
                 triangle = self.generate_triangle()
                 data.append((self._triangle_label, triangle))
         return data
-
-
 
     def generate_circle(self):
         circle = np.ones((self._size, self._size), dtype=float) * self._off

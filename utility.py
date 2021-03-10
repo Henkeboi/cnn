@@ -67,11 +67,12 @@ class VectorDerivativeRelu:
 
 
 class MSE:
-    def __call__(self, target, output):
-        mse = 0
-        for i in range(0, len(target)):
-            mse = mse + (output[i] - target[i]) ** 2
-        return mse
+    def __call__(self, label, prediction):
+        loss = np.full((label.shape[1], 1), 0.0)
+        for i in range(loss.shape[0]):
+            loss[i][0] = (label[0][i] - prediction[0][i]) ** 2
+        loss = loss / loss.shape[0]
+        return loss
 
 class DerivativeMSE:
     def __call__(self, target, output):
@@ -80,3 +81,5 @@ class DerivativeMSE:
         for i in range(0, len(target)):
             output[i] = -2 * (output[i] - target[i])
         return output
+
+
