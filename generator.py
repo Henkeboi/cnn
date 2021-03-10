@@ -15,18 +15,26 @@ class Generator:
         self._display_time = 5
         self._shapes = shapes
 
+        label_counter = 0
         self._circle_label = np.full((1, len(shapes)), 0.0)
         if len(shapes) > 0:
-            self._circle_label[0][0] = 1.0
+            self._circle_label[0][label_counter] = 1.0
+            label_counter = label_counter + 1
 
         self._cross_label = np.full((1, len(shapes)), 0.0)
         if len(shapes) > 1:
-            self._cross_label[0][1] = 1.0
+            self._cross_label[0][label_counter] = 1.0
+            label_counter = label_counter + 1
 
         self._rectangle_label = np.full((1, len(shapes)), 0.0)
         if len(shapes) > 2:
-            self._rectangle_label[0][2] = 1.0
+            self._rectangle_label[0][label_counter] = 1.0
+            label_counter = label_counter + 1
 
+        self._triangle_label = np.full((1, len(shapes)), 0.0)
+        if len(shapes) > 3:
+            self._triangle_label[0][label_counter] = 1.0
+            label_counter = label_counter + 1
 
     def show(self, data):
         node_counter = 0
@@ -60,6 +68,9 @@ class Generator:
             if "rectangle" in self._shapes:
                 rectangle = self.generate_rectangle()
                 data.append((self._rectangle_label, rectangle))
+            if "triangle" in self._shapes:
+                triangle = self.generate_triangle()
+                data.append((self._triangle_label, triangle))
         return data
 
 
@@ -101,7 +112,25 @@ class Generator:
         rectangle = self._add_noise(rectangle)
         return rectangle
 
- 
+    def generate_triangle(self):
+        triangle = np.ones((self._size, self._size), dtype=float) * self._off 
+        for x in range(0, self._size):
+            for y in range(0, self._size):
+                if x == self._size // 6:
+                    if y >= int(self._size / 6) and y <= int(5 * self._size / 6):
+                        triangle[x][y] = self._on
+                if x == 2 * self._size // 6:
+                    if y >= int(self._size / 6) and y <= int(5 * self._size / 6):
+                        triangle[x][y] = self._on
+                if x == 3 * self._size // 6:
+                    if y >= int(self._size / 6) and y <= int(5 * self._size / 6):
+                        triangle[x][y] = self._on
+                if x == 4 * self._size // 6:
+                    if y >= int(self._size / 6) and y <= int(5 * self._size / 6):
+                        triangle[x][y] = self._on
+        triangle = self._add_noise(triangle)
+        return triangle
+
     def _add_noise(self, frame):
         is_noisy_pixel = lambda : random.random() < self._noise
         for x in range(0, np.shape(frame)[1]):

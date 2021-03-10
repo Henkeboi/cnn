@@ -100,7 +100,6 @@ class Network:
                     w_d.append(input_activation.T @ deltas[-1].T)
                     a_d = self.vector_to_matrix(input_activation).T
                 else:
-                    #w_d.append(input_activation.T @ deltas[-1].T)
                     w_d.append((deltas[-1] @ input_activation).T)
                 w = layer._weights
                 delta = w @ deltas[-1]
