@@ -1,6 +1,10 @@
 LAYER
+type: input
+output_size: 100
+
+LAYER
 type: convolution
-kernel_n: 6
+kernel_n: 1
 kernel_m: 6
 channels: 1
 stride_n: 1

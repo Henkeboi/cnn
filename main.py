@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import config
 
 def main():
+    print_loss = False
+
     relu = utility.Relu()
     relu_d = utility.DerivativeRelu()
 
@@ -32,6 +34,8 @@ def main():
     training_loss = []
     for i, (label, figure) in enumerate(training_set):
         training_loss.append(nn.train(label, figure).sum())
+        if i % 100 == 0 and print_loss:
+            print(training_loss[-1])
         if i % 1000 == 0:
             print("Training samples done: " + str(i))
 

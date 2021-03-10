@@ -5,7 +5,7 @@ class InputLayer:
     def __init__(self, input_size, output_size):
         self._input_size = input_size
         self._output_size = output_size
-        self._weights = np.random.rand(input_size, output_size) 
+        self._weights = np.random.rand(input_size, output_size) * 0.1
     
     def convert_input_shape(self, data):
         if type(data) == np.ndarray:

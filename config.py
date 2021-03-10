@@ -63,10 +63,9 @@ class NetworkConfig:
         prev_layer = None
         for data in self._layers:
             if data["type"] == "input":
-                input_size = int(data["input"])
-                output_size = int(data["output"])
-                input_layer = InputLayer(input_size, output_size) 
-                layer = layers.InputLayer(input_size, output_size)
+                input_size = self._input_size * self._input_size
+                output_size = int(data["output_size"])
+                layer = InputLayer(input_size, output_size)
             elif data["type"] == "dense":
                 if "output_size" in data:
                     output_size = int(data["output_size"])
