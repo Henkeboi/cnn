@@ -89,7 +89,7 @@ class Network:
         w_d = [] 
         deltas = []
 
-        loss, loss_d = self.get_loss(label, copy.deepcopy(activations[-1]), transfers[-1])
+        loss, loss_d = self.get_loss(label, copy.deepcopy(activations[-1]), copy.deepcopy(transfers[-1]))
         deltas.append(loss_d)
     
         for i, layer in enumerate(reversed(self._hidden_layers)):
@@ -102,10 +102,10 @@ class Network:
                     w_d.append(input_activation.T @ deltas[-1].T)
                     a_d = self.vector_to_matrix(input_activation).T
                 else:
-                    w_d.append(input_activation.T @ deltas[-1].T)
-                    a_d = layer.derivative(input_activation.T)
+                    #w_d.append(input_activation.T @ deltas[-1].T)
+                    w_d.append((deltas[-1] @ input_activation).T)
                 w = layer._weights
-                delta = a_d @ w @ deltas[-1]
+                delta = w @ deltas[-1]
                 deltas.append(delta)
             elif type(layer) == layers.ConvolutionLayer:
                 input_activation = activations[-2 - i]
@@ -136,15 +136,13 @@ class Network:
     def get_loss(self, label, activation, transfer):
         loss = np.full((label.shape[1], 1), 0.0)
         for i in range(loss.shape[0]):
-            loss[i][0] = (label[0][i] - transfer[0][i])
-
+            loss[i][0] = (label[0][i] - transfer[0][i]) ** 2
+        loss = loss / loss.shape[0]
 
         output_layer = self._hidden_layers[-1]
-        f = output_layer.derivative(transfer.T)
-        a = activation.T
-        
-        loss_d = f.T @ activation.T 
-        loss_d = np.multiply(loss, loss_d)
+        loss_d = (label - activation) * output_layer.derivative(transfer.T)
+        loss_d = loss_d[:][0].reshape(output_layer.get_output_shape()[1], 1)
+
         return loss, loss_d
 
     def train(self, label, data):

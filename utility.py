@@ -3,6 +3,9 @@ import math
 
 class Softmax:
     def __call__(self, z):
+        e_x = np.exp(z - np.max(z))
+        s = e_x / e_x.sum()
+        return s
         a = np.full(z.shape, 0.0)
         z_sum = np.exp(z).sum(axis=1)
         for j in range(z.shape[1]):
@@ -12,13 +15,14 @@ class Softmax:
 class DerivativeSoftmax:
     def __init__(self):
         self._softmax = Softmax()
+        self._sigmoid = Sigmoid()
 
     def __call__(self, a):
-        print(a)
-        for j in range(a.shape[0]):
-            print(a[j][0])
-
-
+        #a = self._softmax(a)
+        s = self._softmax(a)* (1.0 - self._softmax(a.T))
+        #print(s)
+        return s
+        
 
 class Sigmoid:
     def __call__(self, activation):
@@ -33,6 +37,7 @@ class DerivativeSigmoid:
             for i in range(size):
                 activation[i][0] = 1.0 / (1.0 + math.exp(-1.0 * activation[i][0]))
         except:
+            print("Derivative sigmoid overflow")
             print(activation)
             print()
             quit()

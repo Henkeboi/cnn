@@ -12,6 +12,8 @@ class InputLayer:
             if not data.ndim == 1:
                 data = data.flatten()
         return data
+    def get_output_shape(self):
+        return (1, self._output_size)
 
     def forward(self, data): 
         data = self.convert_input_shape(data)
@@ -47,7 +49,7 @@ class ConvolutionLayer:
     def update_weights(self, weights):
         assert(len(weights) == len(self._kernels))
         for i, d_w in enumerate(weights):
-            self._kernels[i] = self._kernels[i] + self._la * d_w
+            self._kernels[i] = self._kernels[i] - self._la * d_w
 
     def get_kernels(self):
         return self._kernels

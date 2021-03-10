@@ -14,20 +14,21 @@ def main():
     softmax = utility.Softmax()
     softmax_d = utility.DerivativeSoftmax()
 
-    size = 20
-    noise = 0.1
-    shapes = ["circle", "cross"]
+    size = 10
+    noise = 0.0
+    shapes = ["circle", "cross", "rectangle"]
     generator = Generator(size, noise, shapes)
-    data = generator.generate(50)
+    data = generator.generate(4000)
     
     input_shape = (size, size, 1)
     kernel_n = 4
     kernel_m = 4
     channels_out = 1
     output_shape = (kernel_n, kernel_m, channels_out)
-    input_layer = layers.ConvolutionLayer(input_shape, output_shape, 1, 1, 0, 0.01)
-    hidden_layer0 = layers.DenseLayer(input_layer.get_output_shape(), 5, relu, relu_d, 0.01)
-    output_layer = layers.DenseLayer(hidden_layer0.get_output_shape(), len(shapes), sigmoid, sigmoid_d, 0.01)
+    input_layer = layers.ConvolutionLayer(input_shape, output_shape, 1, 1, 0, 0.001)
+    #input_layer = layers.InputLayer(size * size, 25)
+    hidden_layer0 = layers.DenseLayer(input_layer.get_output_shape(), 5, relu, relu_d, 0.001)
+    output_layer = layers.DenseLayer(hidden_layer0.get_output_shape(), len(shapes), softmax, softmax_d, 0.001)
     hidden_layers = [hidden_layer0, output_layer]
 
     nn = network.Network(input_layer, hidden_layers)
@@ -46,6 +47,12 @@ def main():
     prediction = nn.forward_pass(cross)[1][-1]
     generator.show(cross)
     print("Cross prediction:")
+    print(prediction)
+
+    rectangle = generator.generate_rectangle()
+    prediction = nn.forward_pass(rectangle)[1][-1]
+    generator.show(rectangle)
+    print("Rectangle prediction:")
     print(prediction)
 
 
