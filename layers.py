@@ -12,6 +12,8 @@ class InputLayer:
             if not data.ndim == 1:
                 data = data.flatten()
         return data
+    def get_output_shape(self):
+        return (1, self._output_size)
 
     def forward(self, data): 
         data = self.convert_input_shape(data)
@@ -26,7 +28,7 @@ class ConvolutionLayer:
         self._la = la
         self._input_shape = input_shape
         for _ in range(output_shape[2]):
-            self._kernels.append(np.random.rand(output_shape[0], output_shape[1]) * 0.01)
+            self._kernels.append(np.random.rand(output_shape[0], output_shape[1]) * 0.8)
 
         self._h_stride = h_stride 
         self._v_stride = v_stride 
@@ -47,7 +49,8 @@ class ConvolutionLayer:
     def update_weights(self, weights):
         assert(len(weights) == len(self._kernels))
         for i, d_w in enumerate(weights):
-            self._kernels[i] = self._kernels[i] + self._la * d_w
+            self._kernels[i] = self._kernels[i] - self._la * d_w
+
     def get_kernels(self):
         return self._kernels
 
@@ -78,7 +81,6 @@ class DenseLayer:
         self._af = af
         self._af_d = af_d
         self._weights = np.random.rand(self._input_size, output_size) * 0.1
-    
     def update_weights(self, d_w):
         self._weights = self._weights + self._la * d_w
 
@@ -92,6 +94,9 @@ class DenseLayer:
 
     def get_output_shape(self):
         return (1, self._output_size)
+
+    def update_weights(self, d_w):
+        self._weights = self._weights + self._la * d_w
 
     def forward(self, data):
         data = self.convert_input_shape(data)

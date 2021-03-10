@@ -84,14 +84,10 @@ class Network:
 
     def backward_pass(self, label, data):
         activations, transfers = self.forward_pass(data)
-        print(label)
-        print(activations[-1])
-        print(transfers[-1])
-        print()
         w_d = [] 
         deltas = []
 
-        loss, loss_d = self.get_loss(label, copy.deepcopy(activations[-1]), transfers[-1])
+        loss, loss_d = self.get_loss(label, copy.deepcopy(activations[-1]), copy.deepcopy(transfers[-1]))
         deltas.append(loss_d)
 
         for i, layer in enumerate(reversed(self._hidden_layers)):
@@ -104,10 +100,10 @@ class Network:
                     w_d.append(input_activation.T @ deltas[-1].T)
                     a_d = self.vector_to_matrix(input_activation).T
                 else:
-                    w_d.append(input_activation.T @ deltas[-1].T)
-                    a_d = layer.derivative(input_activation.T)
+                    #w_d.append(input_activation.T @ deltas[-1].T)
+                    w_d.append((deltas[-1] @ input_activation).T)
                 w = layer._weights
-                delta = a_d @ w @ deltas[-1]
+                delta = w @ deltas[-1]
                 deltas.append(delta)
             elif type(layer) == layers.ConvolutionLayer:
                 input_activation = activations[-2 - i]
@@ -119,11 +115,11 @@ class Network:
                 for delta_index, kernel in enumerate(layer.get_kernels()):
                     kernel_delta = kernel_deltas[delta_index]
                     if type(input_activation) == list:
-                        delta = np.full((input_activation[0].shape[0], input_activation[0].shape[1]), 0.0)
-                        k_d = np.full((kernel.shape[0], kernel.shape[0]), 0.0)
-                        for channel in input_activation:
-                            delta = delta + channel @ self.reverse_convolute(kernel_delta, kernel)
-                            k_d = k_d + self.convolute(channel, kernel_delta)
+                            delta = np.full((input_activation[0].shape[0], input_activation[0].shape[1]), 0.0)
+                            k_d = np.full((kernel.shape[0], kernel.shape[0]), 0.0)
+                            for channel in input_activation:
+                                delta = delta + channel @ self.reverse_convolute(kernel_delta, kernel)
+                                k_d = k_d + self.convolute(channel, kernel_delta)
                     else:
                         delta = np.full((input_activation.shape[0], input_activation.shape[1]), 0.0)
                         k_d = np.full((kernel.shape[0], kernel.shape[0]), 0.0)
@@ -138,12 +134,12 @@ class Network:
     def get_loss(self, label, activation, transfer):
         loss = np.full((label.shape[1], 1), 0.0)
         for i in range(loss.shape[0]):
-            loss[i][0] = (label[0][i] - transfer[0][i])
+            loss[i][0] = (label[0][i] - transfer[0][i]) ** 2
+        loss = loss / loss.shape[0]
 
         output_layer = self._hidden_layers[-1]
-        f = output_layer.derivative(transfer.T)
-        a = activation.T
-        loss_d = np.multiply(loss, f.T @ a)
+        loss_d = (label - activation) * output_layer.derivative(transfer.T)
+        loss_d = loss_d[:][0].reshape(output_layer.get_output_shape()[1], 1)
 
         return loss, loss_d
 
@@ -155,8 +151,9 @@ class Network:
                 layer.update_weights(w_d[i])
                 i = i + 1
             elif type(layer) == layers.ConvolutionLayer:
-                num_kernels = len(layer.get_kernels())
-                layer.update_weights(w_d[i : i + num_kernels])
-                i = i + num_kernels
+                for k_index in range(len(layer.get_kernels())):
+                    num_kernels = len(layer.get_kernels())
+                    layer.update_weights(w_d[i : i + num_kernels])
+                    i = i + 1
         return loss
 
