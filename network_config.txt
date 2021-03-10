@@ -9,6 +9,16 @@ padding: 0
 la: 0.01
 
 LAYER
+type: convolution
+kernel_n: 2
+kernel_m: 2
+channels: 1
+stride_n: 1
+stride_m: 1
+padding: 0
+la: 0.01
+
+LAYER
 type: dense
 output_size: 10
 af: relu
@@ -17,4 +27,4 @@ la: 0.001
 LAYER
 type: dense
 af: softmax
-la: 0.0001
+la: 0.001

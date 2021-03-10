@@ -80,6 +80,8 @@ class NetworkConfig:
             elif data["type"] == "convolution":
                 if prev_layer == None:
                     input_shape = (self._input_size, self._input_size, 1)
+                else:
+                    input_shape = prev_layer.get_output_shape()
                 kernel_n = int(data["kernel_n"])
                 kernel_m = int(data["kernel_m"])
                 channels_out = int(data["channels"])
