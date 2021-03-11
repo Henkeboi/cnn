@@ -29,7 +29,7 @@ class ConvolutionLayer:
         self._la = la
         self._input_shape = input_shape
         for _ in range(output_shape[2]):
-            self._kernels.append(np.random.rand(output_shape[0], output_shape[1]) * 0.1)
+            self._kernels.append(np.random.rand(output_shape[0], output_shape[1]) * 0.8)
 
         self._h_stride = h_stride 
         self._v_stride = v_stride 

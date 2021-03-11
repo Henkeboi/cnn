@@ -1,8 +1,8 @@
 LAYER
 type: convolution
-kernel_n: 6
-kernel_m: 6
-channels: 1
+kernel_n: 4
+kernel_m: 4
+channels: 2
 stride_n: 1
 stride_m: 1
 padding: 0
@@ -10,7 +10,7 @@ la: 0.01
 
 LAYER
 type: dense
-output_size: 10
+output_size: 5
 af: relu
 la: 0.001
 
